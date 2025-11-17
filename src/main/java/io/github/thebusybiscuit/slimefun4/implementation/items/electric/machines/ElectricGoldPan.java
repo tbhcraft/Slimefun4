@@ -1,11 +1,16 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.electric.machines;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import io.github.bakedlibs.dough.items.CustomItemStack;
+import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
+import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
+import me.mrCookieSlime.Slimefun.api.inventory.DirtyChestMenu;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -38,12 +43,50 @@ public class ElectricGoldPan extends AContainer implements RecipeDisplayItem {
     private final ItemSetting<Boolean> overrideOutputLimit = new ItemSetting<>(this, "override-output-limit", false);
 
     private final GoldPan goldPan = SlimefunItems.GOLD_PAN.getItem(GoldPan.class);
-    private final GoldPan netherGoldPan = SlimefunItems.NETHER_GOLD_PAN.getItem(GoldPan.class);
 
     @ParametersAreNonnullByDefault
     public ElectricGoldPan(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
         addItemSetting(overrideOutputLimit);
+    }
+    private static final int[] border = { 4, 13, 31, 40 };
+    private static final int[] inputBorder = { 0, 1, 2, 3, 12, 21, 30, 36, 37, 38, 39 };
+    private static final int[] outputBorder = { 5, 6, 7, 8, 14, 23, 32, 41, 42, 43, 44 };
+
+    @Override
+    public int[] getInputSlots() {
+        return new int[] { 9, 10, 11, 18, 19, 20, 27, 28, 29 };
+    }
+
+    @Override
+    public int[] getOutputSlots() {
+        return new int[] { 15, 16,17, 24, 25, 26, 33, 34, 35 };
+    }
+
+    @Nonnull
+    private Comparator<Integer> compareSlots(@Nonnull DirtyChestMenu menu) {
+        return Comparator.comparingInt(slot -> menu.getItemInSlot(slot).getAmount());
+    }
+
+    @Override
+    protected void constructMenu(BlockMenuPreset preset) {
+        for (int i : border) {
+            preset.addItem(i, ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
+        }
+
+        for (int i : inputBorder) {
+            preset.addItem(i, ChestMenuUtils.getInputSlotTexture(), ChestMenuUtils.getEmptyClickHandler());
+        }
+
+        for (int i : outputBorder) {
+            preset.addItem(i, ChestMenuUtils.getOutputSlotTexture(), ChestMenuUtils.getEmptyClickHandler());
+        }
+
+        preset.addItem(22, new CustomItemStack(Material.BLACK_STAINED_GLASS_PANE, " "), ChestMenuUtils.getEmptyClickHandler());
+
+        for (int i : getOutputSlots()) {
+            preset.addMenuClickHandler(i, ChestMenuUtils.getDefaultOutputHandler());
+        }
     }
 
     /**
@@ -74,8 +117,6 @@ public class ElectricGoldPan extends AContainer implements RecipeDisplayItem {
         List<ItemStack> recipes = new ArrayList<>();
 
         recipes.addAll(goldPan.getDisplayRecipes());
-        recipes.addAll(netherGoldPan.getDisplayRecipes());
-
         return recipes;
     }
 
@@ -98,9 +139,6 @@ public class ElectricGoldPan extends AContainer implements RecipeDisplayItem {
             if (goldPan.isValidInput(item)) {
                 output = goldPan.getRandomOutput();
                 recipe = new MachineRecipe(3 / getSpeed(), new ItemStack[] { item }, new ItemStack[] { output });
-            } else if (netherGoldPan.isValidInput(item)) {
-                output = netherGoldPan.getRandomOutput();
-                recipe = new MachineRecipe(4 / getSpeed(), new ItemStack[] { item }, new ItemStack[] { output });
             }
 
             if (output != null && output.getType() != Material.AIR && menu.fits(output, getOutputSlots())) {

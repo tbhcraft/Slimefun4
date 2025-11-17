@@ -64,9 +64,6 @@ public class Composter extends SimpleSlimefunItem<BlockUseHandler> implements Re
         items.add(new ItemStack(Material.SAND, 2));
         items.add(new ItemStack(Material.SOUL_SAND));
 
-        items.add(new ItemStack(Material.WHEAT, 4));
-        items.add(new ItemStack(Material.NETHER_WART));
-
         return items;
     }
 

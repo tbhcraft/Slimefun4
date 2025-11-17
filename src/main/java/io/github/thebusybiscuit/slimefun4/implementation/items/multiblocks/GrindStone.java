@@ -33,7 +33,7 @@ public class GrindStone extends MultiBlockMachine {
 
     @ParametersAreNonnullByDefault
     public GrindStone(ItemGroup itemGroup, SlimefunItemStack item) {
-        super(itemGroup, item, new ItemStack[] { null, null, null, null, new ItemStack(Material.OAK_FENCE), null, null, CustomItemStack.create(Material.DISPENSER, "Dispenser (Facing up)"), null }, BlockFace.SELF);
+        super(itemGroup, item, new ItemStack[] { null, null, null, null, new ItemStack(Material.OAK_FENCE), null, null, new CustomItemStack(Material.DISPENSER, "Dispenser (Facing up)"), null }, BlockFace.SELF);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class GrindStone extends MultiBlockMachine {
         recipes.add(new ItemStack(Material.GRAVEL));
 
         recipes.add(new ItemStack(Material.DIRT));
-        recipes.add(SlimefunItems.STONE_CHUNK.item());
+        recipes.add(SlimefunItems.STONE_CHUNK);
 
         recipes.add(new ItemStack(Material.SANDSTONE));
         recipes.add(new ItemStack(Material.SAND, 4));
@@ -86,6 +86,12 @@ public class GrindStone extends MultiBlockMachine {
         recipes.add(new ItemStack(Material.BASALT, 2));
         recipes.add(new ItemStack(Material.BLACKSTONE));
 
+        recipes.add(new ItemStack(Material.DEEPSLATE));
+        recipes.add(new ItemStack(Material.COBBLED_DEEPSLATE));
+
+        recipes.add(new ItemStack(Material.STONE));
+        recipes.add(new ItemStack(Material.COBBLESTONE));
+
         if (Slimefun.getMinecraftVersion().isAtLeast(MinecraftVersion.MINECRAFT_1_17)) {
             recipes.add(new ItemStack(Material.AMETHYST_BLOCK));
             recipes.add(new ItemStack(Material.AMETHYST_SHARD, 4));
@@ -94,20 +100,20 @@ public class GrindStone extends MultiBlockMachine {
             recipes.add(new ItemStack(Material.GRAVEL));
         }
 
-        recipes.add(SlimefunItems.MAGIC_LUMP_2.item());
-        recipes.add(new SlimefunItemStack(SlimefunItems.MAGIC_LUMP_1, 4).item());
+        recipes.add(SlimefunItems.MAGIC_LUMP_2);
+        recipes.add(new SlimefunItemStack(SlimefunItems.MAGIC_LUMP_1, 4));
 
-        recipes.add(SlimefunItems.MAGIC_LUMP_3.item());
-        recipes.add(new SlimefunItemStack(SlimefunItems.MAGIC_LUMP_2, 4).item());
+        recipes.add(SlimefunItems.MAGIC_LUMP_3);
+        recipes.add(new SlimefunItemStack(SlimefunItems.MAGIC_LUMP_2, 4));
 
-        recipes.add(SlimefunItems.ENDER_LUMP_2.item());
-        recipes.add(new SlimefunItemStack(SlimefunItems.ENDER_LUMP_1, 4).item());
+        recipes.add(SlimefunItems.ENDER_LUMP_2);
+        recipes.add(new SlimefunItemStack(SlimefunItems.ENDER_LUMP_1, 4));
 
-        recipes.add(SlimefunItems.ENDER_LUMP_3.item());
-        recipes.add(new SlimefunItemStack(SlimefunItems.ENDER_LUMP_2, 4).item());
+        recipes.add(SlimefunItems.ENDER_LUMP_3);
+        recipes.add(new SlimefunItemStack(SlimefunItems.ENDER_LUMP_2, 4));
 
         recipes.add(new ItemStack(Material.DIAMOND));
-        recipes.add(new SlimefunItemStack(SlimefunItems.CARBON, 4).item());
+        recipes.add(new SlimefunItemStack(SlimefunItems.CARBON, 4));
     }
 
     @Override

@@ -2,6 +2,7 @@ package io.github.thebusybiscuit.slimefun4.implementation.listeners.crafting;
 
 import javax.annotation.Nonnull;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
@@ -9,6 +10,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
@@ -33,6 +35,7 @@ public class CraftingTableListener implements SlimefunCraftingListener {
 
             if (sfItem != null && !sfItem.isUseableInWorkbench()) {
                 e.setResult(Result.DENY);
+                Bukkit.getServer().getLogger().info((Player) e.getWhoClicked() + " " + "used Slimefun items in a workbench: Illegal Crafting");
                 Slimefun.getLocalization().sendMessage((Player) e.getWhoClicked(), "workbench.not-enhanced", true);
                 break;
             }

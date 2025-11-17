@@ -27,6 +27,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import io.github.bakedlibs.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.api.events.ExplosiveToolBreakBlocksEvent;
@@ -111,6 +112,7 @@ public class BlockListener implements Listener {
                  * TODO This can be safely removed if/when the deletion no longer has a delay associated with it.
                  */
                 if (Slimefun.getTickerTask().isDeletedSoon(block.getLocation())) {
+                    Bukkit.getServer().getLogger().info(player + " " + "Sneak placed a slimefun block: Illegal duplicaton");
                     Slimefun.getLocalization().sendMessage(player, "messages.await-deletion");
                     e.setCancelled(true);
                     return;
