@@ -87,29 +87,52 @@ public class AutoDisenchanter extends AbstractEnchantmentMachine {
     private @Nullable MachineRecipe disenchant(BlockMenu menu, ItemStack item, ItemStack book) {
         Map<Enchantment, Integer> enchantments = new HashMap<>();
 
-        // Find enchantments
-        for (Map.Entry<Enchantment, Integer> entry : item.getEnchantments().entrySet()) {
-            if (isEnchantmentLevelAllowed(entry.getValue())) {
-                enchantments.put(entry.getKey(), entry.getValue());
-            } else if (!menu.toInventory().getViewers().isEmpty()) {
-                showEnchantmentLevelWarning(menu);
-                return null;
+        if (item.getType() == Material.ENCHANTED_BOOK) {
+            EnchantmentStorageMeta meta = (EnchantmentStorageMeta) item.getItemMeta();
+            // Find enchantments
+            for (Map.Entry<Enchantment, Integer> entry : meta.getStoredEnchants().entrySet()) {
+                if (isEnchantmentLevelAllowed(entry.getValue())) {
+                    enchantments.put(entry.getKey(), entry.getValue());
+                } else if (!menu.toInventory().getViewers().isEmpty()) {
+                    showEnchantmentLevelWarning(menu);
+                    return null;
+                }
             }
         }
+        else {
+            // Find enchantments
+            for (Map.Entry<Enchantment, Integer> entry : item.getEnchantments().entrySet()) {
+                if (isEnchantmentLevelAllowed(entry.getValue())) {
+                    enchantments.put(entry.getKey(), entry.getValue());
+                } else if (!menu.toInventory().getViewers().isEmpty()) {
+                    showEnchantmentLevelWarning(menu);
+                    return null;
+                }
+            }
+        }
+
+
 
         if (!isEnchantmentAmountAllowed(enchantments.size())) {
             return null;
         }
 
         // Check if we found any valid enchantments
-        if (!enchantments.isEmpty()) {
+        if (!enchantments.isEmpty() && item.getType() != Material.ENCHANTED_BOOK || !enchantments.isEmpty() &&  item.getType() == Material.ENCHANTED_BOOK && enchantments.size() > 1) {
             ItemStack disenchantedItem = item.clone();
             disenchantedItem.setAmount(1);
 
             ItemStack enchantedBook = new ItemStack(Material.ENCHANTED_BOOK);
             transferEnchantments(disenchantedItem, enchantedBook, enchantments);
 
-            MachineRecipe recipe = new MachineRecipe(90 * enchantments.size() / this.getSpeed(), new ItemStack[] { book, item }, new ItemStack[] { disenchantedItem, enchantedBook });
+            MachineRecipe recipe = null;
+
+            if(item.getType() == Material.ENCHANTED_BOOK) {
+                recipe = new MachineRecipe(1, new ItemStack[]{book, item}, new ItemStack[]{disenchantedItem, enchantedBook});
+            }
+            else {
+                recipe = new MachineRecipe(30 * enchantments.size() / this.getSpeed(), new ItemStack[]{book, item}, new ItemStack[]{disenchantedItem, enchantedBook});
+            }
 
             if (!InvUtils.fitAll(menu.toInventory(), recipe.getOutput(), getOutputSlots())) {
                 return null;
@@ -135,17 +158,34 @@ public class AutoDisenchanter extends AbstractEnchantmentMachine {
 
         EnchantmentStorageMeta meta = (EnchantmentStorageMeta) book.getItemMeta();
 
-        for (Map.Entry<Enchantment, Integer> entry : enchantments.entrySet()) {
-            Enchantment enchantmentToTransfer = entry.getKey();
-            boolean wasEnchantmentRemoved = itemMeta.removeEnchant(enchantmentToTransfer);
-            boolean stillHasEnchantment = itemMeta.getEnchants().containsKey(enchantmentToTransfer);
+        if(item.getType() == Material.ENCHANTED_BOOK) {
+            Enchantment enchantmentToTransfer = enchantments.entrySet().stream().toList().getLast().getKey();
+            int levelToTransfer = enchantments.entrySet().stream().toList().getLast().getValue();
+            EnchantmentStorageMeta enchMeta = (EnchantmentStorageMeta) item.getItemMeta();
+            boolean wasEnchantmentRemoved = enchMeta.removeStoredEnchant(enchantmentToTransfer);
+            boolean stillHasEnchantment = enchMeta.getStoredEnchants().containsKey(enchantmentToTransfer);
+            itemMeta = enchMeta;
 
-            // Prevent future enchantment duplication (#3837)
             if (wasEnchantmentRemoved && !stillHasEnchantment) {
-                meta.addStoredEnchant(enchantmentToTransfer, entry.getValue(), true);
+                meta.addStoredEnchant(enchantmentToTransfer, levelToTransfer, true);
             } else {
                 // Get Enchantment Name
                 Slimefun.logger().log(Level.SEVERE, "AutoDisenchanter has failed to remove enchantment \"{0}\"", enchantmentToTransfer.getKey().getKey());
+            }
+        }
+        else {
+            for (Map.Entry<Enchantment, Integer> entry : enchantments.entrySet()) {
+                Enchantment enchantmentToTransfer = entry.getKey();
+                boolean wasEnchantmentRemoved = itemMeta.removeEnchant(enchantmentToTransfer);
+                boolean stillHasEnchantment = itemMeta.getEnchants().containsKey(enchantmentToTransfer);
+
+                // Prevent future enchantment duplication (#3837)
+                if (wasEnchantmentRemoved && !stillHasEnchantment) {
+                    meta.addStoredEnchant(enchantmentToTransfer, entry.getValue(), true);
+                } else {
+                    // Get Enchantment Name
+                    Slimefun.logger().log(Level.SEVERE, "AutoDisenchanter has failed to remove enchantment \"{0}\"", enchantmentToTransfer.getKey().getKey());
+                }
             }
         }
 
@@ -154,6 +194,7 @@ public class AutoDisenchanter extends AbstractEnchantmentMachine {
     }
 
     private boolean isDisenchantable(@Nullable ItemStack item) {
+        //if (item != null && !item.getType().isAir() && item.getType() != Material.BOOK && !hasIgnoredLore(item)) {
         if (item != null && !item.getType().isAir() && item.getType() != Material.BOOK && !hasIgnoredLore(item)) {
             SlimefunItem sfItem = SlimefunItem.getByItem(item);
             return sfItem == null || sfItem.isDisenchantable();
